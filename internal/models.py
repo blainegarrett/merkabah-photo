@@ -24,7 +24,7 @@ class Photo(ndb.Model):
         return self.size * 1000
 
 
-class Album(ndb.Model):
+class PhotoAlbum(ndb.Model):
     """
     A ndb.model wrapper to house a photo
     """
