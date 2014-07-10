@@ -8,13 +8,14 @@ from google.appengine.ext import ndb
 
 from ...tests.internal.test_api import PhotoPluginApiCaseBase
 from ...internal.api import album as api
-from ...constants import PHOTOALBUM_KIND
+from ...constants import PHOTOALBUM_KIND, PLUGIN_SLUG
 
 
 class AlbumApiCaseBase(PhotoPluginApiCaseBase):
     """
-    Base Test Case for Series Api helpers
+    Base Test Case for Album Api helpers
     """
+    pass
 
 
 class GetAlbumKeyTests(AlbumApiCaseBase):
@@ -39,26 +40,37 @@ class GetAlbumKeyTests(AlbumApiCaseBase):
         self.assertRaises(RuntimeError, api.get_album_key, {})
         self.assertRaises(RuntimeError, api.get_album_key, 612)
 
-class GetSeriesKeyByKeyStrTests(AlbumApiCaseBase):
+class GetAlbumKeyByKeyStrTests(AlbumApiCaseBase):
     """
+    Tests surrounding getting the album key via urlsafe keystr
     """
 
-    @patch('plugins.photo.internal.api.album.ndb')
+    @patch('plugins.%s.internal.api.album.ndb' % PLUGIN_SLUG)
     def test_base(self, m_ndb):
         """
         Ensure our keystr helper wrapper calls the ndb.Key constructor correctly
         """
 
         # Setup Mocks
-        m_key_init = Mock(name='mocked Key class', return_value='MockedKey')
+        m_key = Mock()
+        m_key.kind.return_value = PHOTOALBUM_KIND
+        m_key_init = Mock(name='mocked Key class', return_value=m_key)
         m_ndb.Key = m_key_init
 
         # Run code under test
         result = api.get_album_key_by_keystr('some_url_safe_keystr')
 
         # Check mocks
-        self.assertEqual(result, 'MockedKey')
+        self.assertEqual(result, m_key)
         m_key_init.assert_called_once_with(urlsafe='some_url_safe_keystr')
+
+    def test_invalid_kind(self):
+        """
+        Ensure urlsafe keys from other Kinds do not work
+        """
+
+        bad_keystr = ndb.Key('SomeOtherKind', 612).urlsafe()
+        self.assertRaises(RuntimeError, api.get_album_key_by_keystr, bad_keystr)
 
     def test_errors(self):
         """
@@ -75,7 +87,7 @@ class GetAlbumBySlugTests(AlbumApiCaseBase):
     Tests surrounding getting album slug
     """
 
-    @patch('plugins.photo.internal.api.album.get_album_key')
+    @patch('plugins.%s.internal.api.album.get_album_key' % PLUGIN_SLUG)
     def test_base(self, m_get_album_key):
         # Setup Mocks
         test_slug = 'test'
@@ -115,6 +127,6 @@ class EditAlbumTests(AlbumApiCaseBase):
 class DeleteAlbumTests(AlbumApiCaseBase):
     pass
 
-class FetchListAlbumTests(AlbumApiCaseBase):
+
+class FetchAlbumListTests(AlbumApiCaseBase):
     pass
-            

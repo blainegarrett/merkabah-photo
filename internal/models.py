@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 
-import logging
-
 from google.appengine.ext import ndb
-from django.core import urlresolvers
+
+from ..constants import PHOTOALBUM_KIND, PHOTO_KIND
 
 
 class Photo(ndb.Model):
@@ -23,13 +22,21 @@ class Photo(ndb.Model):
     def size_in_kb(self):
         return self.size * 1000
 
+    @classmethod
+    def _get_kind(cls):
+        return PHOTO_KIND # This can be overriden in the plugin.config
+
 
 class PhotoAlbum(ndb.Model):
     """
     A ndb.model wrapper to house a photo
     """
 
+    @classmethod
+    def _get_kind(cls):
+        return PHOTOALBUM_KIND # This can be overriden in the plugin.config
 
+'''
 class AlbumPhoto(ndb.Model):
     """
     A many to many interface
@@ -46,3 +53,4 @@ class CollectionPhoto(ndb.Model):
     """
     A many to many interface
     """
+'''

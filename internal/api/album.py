@@ -5,21 +5,25 @@ from ...constants import PHOTOALBUM_KIND
 
 
 def get_album_key_by_keystr(keystr):
-    err = 'Keystrings must be an instance of base string, recieved: %s' % keystr
-
+    """
+    Given a urlsafe version of an Album key, get the actual key
+    """
+    attr_err = 'Keystrings must be an instance of base string, recieved: %s' % keystr
+    kind_err = 'Expected urlsafe keystr for kind %s but received keystr for kind %s instead.'
     if not keystr or not isinstance(keystr, basestring):
-        raise RuntimeError(err)
+        raise RuntimeError(attr_err)
 
-    return ndb.Key(urlsafe=keystr)
+    key = ndb.Key(urlsafe=keystr)
+    if not key.kind() == PHOTOALBUM_KIND:
+        raise RuntimeError(kind_err % (PHOTOALBUM_KIND, key.kind()))
+
+    return key
 
 
 def get_album_key(slug):
     """
     Create a ndb.Key given an Album slug
     """
-
-    # TODO: Get Kind name off plugin def
-
     err = 'Series slug must be defined and of of type basestring'
 
     if not slug or not isinstance(slug, basestring):
@@ -75,8 +79,9 @@ def delete_album(album_key, operator):
     return True
 
 
-def get_series_list():
+def get_album_list():
     """
+    Fetch a list of Albums
     """
 
     # TODO: Paginate this, etc
