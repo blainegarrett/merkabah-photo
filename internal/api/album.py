@@ -54,6 +54,8 @@ def edit_album(album_key, data, operator):
     if not album:
         raise RuntimeError('Album could not be found by Key')
 
+    data['photo_ids'] = [int(photo_id) for photo_id in data['photo_ids'].split(',') if photo_id]
+
     for field, value in data.items():
         setattr(album, field, value)
 
@@ -97,8 +99,12 @@ def create_album(data, operator):
 
     slug = data['slug']
     title = data['title']
+    description = data['description']
+
+    photo_ids = data['photo_ids']
+    photo_ids = [int(photo_id) for photo_id in photo_ids.split(',') if photo_id]
 
     key = get_album_key(slug)
-    entity = PhotoAlbum(key=key, slug=slug, title=title)
+    entity = PhotoAlbum(key=key, slug=slug, title=title, description=description, photo_ids=photo_ids)
     entity.put()
     return entity
